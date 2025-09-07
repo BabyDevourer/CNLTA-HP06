@@ -7,27 +7,22 @@
 
 import SwiftUI
 
-// Đây là file duy nhất bạn cần để chạy MVP này.
-// Toàn bộ logic và giao diện được đặt ở đây để dễ dàng bắt đầu.
-
 struct ContentView: View {
     
     // MARK: - STATE VARIABLES (Nguồn Chân Lý)
-    // @State sẽ khiến giao diện tự động cập nhật khi các giá trị này thay đổi.
     
-    // 1. Lời chúc người dùng nhập
+    // 1.
     @State var greetingMessage: String = "Chúc Mừng Năm Mới!"
     
-    // 2. Tên ảnh nền đang được chọn (phải khớp với tên trong Assets)
+    // 2.
     @State var selectedImageName: String = "birthdayConfetti"
     
-    // 3. Màu chữ đang được chọn
+    // 3.
     @State var selectedTextColor: Color = .white
     
     @State  var fontSize: CGFloat = 32
+    @State var selectedFont: FontOption = defaultFontOptions.first!
     // MARK: - DATA (Dữ liệu cho các lựa chọn)
-    // Trong MVP, chúng ta hardcode các lựa chọn này.
-    
     let availableBackgrounds: [String] = ["birthdayConfetti", "happySmiles", "goldFrame", "flowerFrame"]
     let availableColors: [Color] = [.white, .black, .yellow, .pink, .green, Color(red: 0.1, green: 0.9, blue: 0.8)]
     
@@ -37,62 +32,86 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            // --- 1. VÙNG XEM TRƯỚC THIỆP ---
-            // ZStack cho phép xếp chồng các View lên nhau.
+            // --- 1.DISPLAY AREA ---
             ZStack {
-                // Lớp dưới cùng: Ảnh nền
+                
                 Image(selectedImageName)
                     .resizable()
-                    .scaledToFill() // Lấp đầy khung, có thể bị cắt
-                    .frame(height: 350)
-                    .clipped() // Cắt phần ảnh thừa
+                    .scaledToFill()
+                    .frame(width: 350, height: 350)
+                    .clipped()
                     .cornerRadius(15)
                     .shadow(radius: 5)
 
-                // Lớp trên: Lời chúc
+                // Greet Message
                 Text(greetingMessage)
-                    .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                    .font(selectedFont.makeFont(fontSize))
                     .foregroundColor(selectedTextColor)
                     .multilineTextAlignment(.center)
                     .padding()
-                    .shadow(color: .black.opacity(0.5), radius: 3, x: 2, y: 2) // Thêm bóng để chữ dễ đọc
+                    .shadow(color: .black.opacity(0.5), radius: 3, x: 2, y: 2)
+                    .frame(width: 350, height: 350)
                 
             }
             .padding()
-
             
-            // --- 2. VÙNG ĐIỀU KHIỂN ---
+            
+            SaveButton(
+                imageName: selectedImageName,
+                greetingMessage: greetingMessage,
+                textColor: selectedTextColor,
+                fontSize: fontSize
+            )
+            .padding(5)
+            
+            
+            
+            // --- 2. TOOLS AREA ---
             VStack(alignment: .leading, spacing: 16) {
                 
-                // 2.1. Nhập lời chúc
+                // 2.1. Text Maker
                 MessageMaker(greetingMessage: $greetingMessage)
                 
                 Divider()
                 
-                // 2.2. Chọn ảnh nền
+                // 2.2. Image chooser
                 ImagePicker(selectedImageName: $selectedImageName)
                 
                 Divider()
                 
-                // 2.3. Chọn màu chữ
+                // 2.3. Choose colour
                 ColourPicker(selectedTextColor: $selectedTextColor)
                 
-                // Font Changer
+                // 2.4. Font Picker
+                
+                Picker("Kiểu chữ", selection: $selectedFont) {
+                    ForEach(defaultFontOptions) { option in
+                        Text(option.name)
+                            .font(option.makeFont(16))
+                            .tag(option)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Divider()
+
+                // 2.5 Font Size Decder
                 FontChanger(fontSize : $fontSize)
                 
                 
             }
             .padding(.horizontal)
             
-            Spacer() // Đẩy tất cả các control lên trên
+            Spacer()
         }
-        .background(Color(.systemGray6).ignoresSafeArea()) // Màu nền cho toàn bộ màn hình
+        // Background colour for app
+        .background(Color(.systemGray6).ignoresSafeArea())
     }
 }
 
 
 // MARK: - PREVIEW
-// Dùng để xem trước trong Xcode Canvas
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
